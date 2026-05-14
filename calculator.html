@@ -104,53 +104,36 @@ body {
 const inputDisplay = document.getElementById('inputDisplay');
 const resultDisplay = document.getElementById('resultDisplay');
 let expression = '';
-let prevResult = 0;
-
-function tryEval(expr) {
-    try {
-        const s = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-        return Function('"use strict"; return (' + s + ')')();
-    } catch { return undefined; }
-}
-
-function updatePreview() {
-    inputDisplay.textContent = expression;
-    if (!expression) { resultDisplay.textContent = '0'; return; }
-    const r = tryEval(expression);
-    if (r !== undefined) {
-        prevResult = r;
-        resultDisplay.textContent = Number.isInteger(r) ? r : parseFloat(r.toFixed(10));
-    }
-}
 
 function append(val) {
     expression += val;
-    updatePreview();
+    inputDisplay.textContent = expression;
 }
 
 function calculate() {
     if (!expression) return;
-    const r = tryEval(expression);
-    if (r !== undefined) {
-        const display = Number.isInteger(r) ? r : parseFloat(r.toFixed(10));
+    try {
+        const s = expression.replace(/×/g, '*').replace(/÷/g, '/');
+        const result = Function('"use strict"; return (' + s + ')')();
+        const display = Number.isInteger(result) ? result : parseFloat(result.toFixed(10));
         resultDisplay.textContent = display;
         expression = String(display);
         inputDisplay.textContent = expression;
-    } else {
+    } catch {
         resultDisplay.textContent = '오류';
     }
 }
 
 function clearAll() {
     expression = '';
-    prevResult = 0;
     inputDisplay.textContent = '';
     resultDisplay.textContent = '0';
 }
 
 function backspace() {
     expression = expression.slice(0, -1);
-    updatePreview();
+    inputDisplay.textContent = expression;
+    if (!expression) resultDisplay.textContent = '0';
 }
 
 document.addEventListener('keydown', e => {
